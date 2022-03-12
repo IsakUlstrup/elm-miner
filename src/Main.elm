@@ -154,7 +154,7 @@ renderTile ( point, tile ) =
 view : Model -> Html Msg
 view model =
     div [ id "app" ]
-        [ div [] [ text ("Stamina: " ++ String.fromFloat model.stamina) ]
+        [ div [ id "game-ui" ] [ text ("Stamina: " ++ String.fromFloat model.stamina) ]
         , renderGrid model.map renderTile
         ]
 
