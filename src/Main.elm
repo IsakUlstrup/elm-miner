@@ -1,20 +1,70 @@
 module Main exposing (..)
 
 import Browser
-import Html exposing (Html, text, div, h1, img)
-import Html.Attributes exposing (src)
+import Dict
+import HexEngine.Grid as Grid exposing (HexGrid)
+import HexEngine.GridGenerator as GridGen exposing (MapGenerationConfig, initMapGenConfig)
+import HexEngine.Point as Point exposing (Point)
+import HexEngine.Render exposing (cornersToString, fancyHexCorners, renderGrid)
+import Html exposing (Html, div, text)
+import Html.Attributes exposing (id)
+import Set
+import Svg exposing (Svg)
+import Svg.Attributes
+import Svg.Events
+
+
+
+---- MAP ----
+
+
+tileType : Float -> Maybe Tile
+tileType val =
+    if val < -0.5 then
+        Just Ground
+
+    else if val < 0.5 then
+        Just Rock
+
+    else
+        Just Ore
+
 
 
 ---- MODEL ----
 
 
+type Tile
+    = Ground
+    | Rock
+    | Ore
+    | CampFire
+
+
 type alias Model =
-    {}
+    { map : HexGrid Tile
+    , mapGenConfig : GridGen.MapGenerationConfig
+    , stamina : Float
+    }
+
+
+initMap : MapGenerationConfig -> HexGrid Tile
+initMap cfg =
+    exploreNeighbours ( 0, 0, 0 ) cfg |> Grid.insert ( ( 0, 0, 0 ), CampFire )
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( {}, Cmd.none )
+    let
+        mapGenCfg =
+            initMapGenConfig |> GridGen.withSeed 13
+    in
+    ( { map = initMap mapGenCfg
+      , mapGenConfig = mapGenCfg
+      , stamina = 10
+      }
+    , Cmd.none
+    )
 
 
 
@@ -22,23 +72,90 @@ init =
 
 
 type Msg
-    = NoOp
+    = ExploreTile Point
+    | DestroyTile Point
+    | Rest
+
+
+exploreNeighbours : Point -> MapGenerationConfig -> HexGrid Tile
+exploreNeighbours point mapGenCfg =
+    Point.neighbors point
+        |> Set.toList
+        |> List.filterMap (GridGen.randomHex mapGenCfg tileType)
+        |> Dict.fromList
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    ( model, Cmd.none )
+    case msg of
+        ExploreTile point ->
+            ( { model | map = Dict.union model.map (exploreNeighbours point model.mapGenConfig) }, Cmd.none )
+
+        DestroyTile point ->
+            if model.stamina > 0 then
+                ( { model
+                    | map = Dict.union model.map (exploreNeighbours point model.mapGenConfig) |> Grid.insert ( point, Ground )
+                    , stamina = model.stamina - 1
+                  }
+                , Cmd.none
+                )
+
+            else
+                ( model, Cmd.none )
+
+        Rest ->
+            ( { model | map = initMap model.mapGenConfig, stamina = 10 }, Cmd.none )
 
 
 
 ---- VIEW ----
 
 
+renderTile : ( Point, Tile ) -> Svg Msg
+renderTile ( point, tile ) =
+    case tile of
+        Ground ->
+            Svg.polygon
+                [ Svg.Attributes.points (fancyHexCorners False |> cornersToString)
+                , Svg.Attributes.class "ground"
+                , Svg.Attributes.class "hex"
+                , Svg.Events.onClick (ExploreTile point)
+                ]
+                []
+
+        Rock ->
+            Svg.polygon
+                [ Svg.Attributes.points (fancyHexCorners False |> cornersToString)
+                , Svg.Attributes.class "rock"
+                , Svg.Attributes.class "hex"
+                , Svg.Events.onClick (DestroyTile point)
+                ]
+                []
+
+        Ore ->
+            Svg.polygon
+                [ Svg.Attributes.points (fancyHexCorners False |> cornersToString)
+                , Svg.Attributes.class "ore"
+                , Svg.Attributes.class "hex"
+                , Svg.Events.onClick (DestroyTile point)
+                ]
+                []
+
+        CampFire ->
+            Svg.polygon
+                [ Svg.Attributes.points (fancyHexCorners False |> cornersToString)
+                , Svg.Attributes.class "campFire"
+                , Svg.Attributes.class "hex"
+                , Svg.Events.onClick Rest
+                ]
+                []
+
+
 view : Model -> Html Msg
 view model =
-    div []
-        [ img [ src "/logo.svg" ] []
-        , h1 [] [ text "Your Elm App is working!" ]
+    div [ id "app" ]
+        [ div [] [ text ("Stamina: " ++ String.fromFloat model.stamina) ]
+        , renderGrid model.map renderTile
         ]
 
 
