@@ -122,8 +122,8 @@ keyedViewHex renderTile tile =
 renderGrid : ( Float, Float ) -> HexGrid tile -> (( Point, tile ) -> Svg msg) -> Svg msg
 renderGrid ( x, y ) grid renderTile =
     svg
-        [ Svg.Attributes.viewBox ([ -50 + x, -50 + y, 100, 100 ] |> List.map String.fromFloat |> List.intersperse " " |> String.concat)
+        [ Svg.Attributes.viewBox ([ -50, -50, 100, 100 ] |> List.map String.fromFloat |> List.intersperse " " |> String.concat)
         , Svg.Attributes.preserveAspectRatio "xMidYMid slice"
         ]
-        [ Svg.Keyed.node "g" [] (List.map (keyedViewHex renderTile) (Dict.toList grid))
+        [ Svg.Keyed.node "g" [ Svg.Attributes.style ("transform: translate(" ++ String.fromFloat -x ++ "px, " ++ String.fromFloat -y ++ "px);"), Svg.Attributes.id "root" ] (List.map (keyedViewHex renderTile) (Dict.toList grid))
         ]
