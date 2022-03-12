@@ -1,4 +1,4 @@
-module HexEngine.Render exposing (cornersToString, fancyHexCorners, renderGrid)
+module HexEngine.Render exposing (cornersToString, fancyHexCorners, pointToPixel, renderGrid)
 
 import Dict
 import HexEngine.Grid exposing (HexGrid)
@@ -119,10 +119,10 @@ keyedViewHex renderTile tile =
     )
 
 
-renderGrid : HexGrid tile -> (( Point, tile ) -> Svg msg) -> Svg msg
-renderGrid grid renderTile =
+renderGrid : ( Float, Float ) -> HexGrid tile -> (( Point, tile ) -> Svg msg) -> Svg msg
+renderGrid ( x, y ) grid renderTile =
     svg
-        [ Svg.Attributes.viewBox "-50 -50 100 100"
+        [ Svg.Attributes.viewBox ([ -50 + x, -50 + y, 100, 100 ] |> List.map String.fromFloat |> List.intersperse " " |> String.concat)
         , Svg.Attributes.preserveAspectRatio "xMidYMid slice"
         ]
         [ Svg.Keyed.node "g" [] (List.map (keyedViewHex renderTile) (Dict.toList grid))
