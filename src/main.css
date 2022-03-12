@@ -14,12 +14,15 @@
   padding: 0;
 }
 
-#app {
+body {
+  background-color: #262626;
   font-family: 'Source Sans Pro', 'Trebuchet MS', 'Lucida Grande', 'Bitstream Vera Sans', 'Helvetica Neue', sans-serif;
+}
+
+#app {
   color: #d5edff;
   height: 100vh;
   overflow: hidden;
-  background-color: #262626;
 }
 
 
