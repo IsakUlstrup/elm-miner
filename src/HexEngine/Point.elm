@@ -17,6 +17,7 @@ module HexEngine.Point exposing
     , scale
     , subtract
     , toAxial
+    , toInt
     , toString
     , valid
     )
@@ -75,6 +76,13 @@ toAxial ( x, y, z ) =
 
     else
         ( 0, 0 )
+
+
+{-| Convert point to a hopefully unique number, useful for deterministic RNG
+-}
+toInt : Point -> Int
+toInt ( x, y, z ) =
+    (x * -10) + y + (z * 10)
 
 
 fromAxial : ( Int, Int ) -> Point
