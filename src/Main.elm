@@ -58,7 +58,7 @@ init : ( Model, Cmd Msg )
 init =
     let
         mapGenCfg =
-            initMapGenConfig |> GridGen.withSeed 13
+            initMapGenConfig |> GridGen.withSeed 120
     in
     ( { map = initMap mapGenCfg
       , mapGenConfig = mapGenCfg

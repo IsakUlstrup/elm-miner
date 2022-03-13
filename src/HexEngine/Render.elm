@@ -119,11 +119,29 @@ keyedViewHex renderTile tile =
     )
 
 
+edgeShadow : Svg msg
+edgeShadow =
+    Svg.radialGradient [ Svg.Attributes.id "edge-shadow" ]
+        [ Svg.stop [ Svg.Attributes.offset "10%", Svg.Attributes.stopColor "black", Svg.Attributes.stopOpacity "0" ] []
+        , Svg.stop [ Svg.Attributes.offset "100%", Svg.Attributes.stopColor "black" ] []
+        ]
+
+
 renderGrid : ( Float, Float ) -> HexGrid tile -> (( Point, tile ) -> Svg msg) -> Svg msg
 renderGrid ( x, y ) grid renderTile =
     svg
         [ Svg.Attributes.viewBox ([ -50, -50, 100, 100 ] |> List.map String.fromFloat |> List.intersperse " " |> String.concat)
         , Svg.Attributes.preserveAspectRatio "xMidYMid slice"
         ]
-        [ Svg.Keyed.node "g" [ Svg.Attributes.style ("transform: translate(" ++ String.fromFloat -x ++ "px, " ++ String.fromFloat -y ++ "px);"), Svg.Attributes.id "root" ] (List.map (keyedViewHex renderTile) (Dict.toList grid))
+        [ Svg.defs [] [ edgeShadow ]
+        , Svg.Keyed.node "g" [ Svg.Attributes.style ("transform: translate(" ++ String.fromFloat -x ++ "px, " ++ String.fromFloat -y ++ "px);"), Svg.Attributes.id "root" ] (List.map (keyedViewHex renderTile) (Dict.toList grid))
+        , Svg.rect
+            [ Svg.Attributes.x "-50"
+            , Svg.Attributes.y "-50"
+            , Svg.Attributes.width "100"
+            , Svg.Attributes.height "100"
+            , Svg.Attributes.fill "url('#edge-shadow')"
+            , Svg.Attributes.pointerEvents "none"
+            ]
+            []
         ]
