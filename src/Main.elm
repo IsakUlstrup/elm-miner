@@ -7,8 +7,9 @@ import Browser
 import HexEngine.Point exposing (Point)
 import HexEngine.RandomMap exposing (RandomMap, exploreNeighbours, fieldOfVisionWithCost, insertReplaceHex, singleton)
 import HexEngine.Render exposing (cornersToString, fancyHexCorners, pointToPixel, renderGrid)
-import Html exposing (Html, div, text)
+import Html exposing (Html, button, div, text)
 import Html.Attributes exposing (id)
+import Html.Events
 import Player exposing (Player)
 import Svg exposing (Svg)
 import Svg.Attributes
@@ -93,6 +94,7 @@ type Msg
     = ExploreTile Point
     | DestroyTile Point
     | Rest Point
+    | DrinkBeer
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -130,6 +132,9 @@ update msg model =
               }
             , Cmd.none
             )
+
+        DrinkBeer ->
+            ( { model | player = Player.drinkBeer model.player }, Cmd.none )
 
 
 
@@ -181,6 +186,14 @@ view model =
     div [ id "app" ]
         [ div [ id "game-ui" ] [ text ("Stamina: " ++ Player.staminaToString model.player) ]
         , renderGrid (model.lastHex |> pointToPixel False) model.map renderTile
+        , div [ id "game-skills" ]
+            [ button [ Html.Events.onClick DrinkBeer, Html.Attributes.class "skill" ]
+                [ text
+                    ("🍺"
+                        ++ (Tuple.first model.player.beer |> String.fromInt)
+                    )
+                ]
+            ]
         ]
 
 

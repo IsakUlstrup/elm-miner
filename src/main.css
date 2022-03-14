@@ -42,6 +42,24 @@ body {
   pointer-events: none;
 }
 
+#game-skills {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  padding: 1rem;
+}
+
+#game-skills .skill {
+  padding: 1rem;
+  background: none;
+  border: none;
+  outline: none;
+  font-size: 2rem;
+  color: white;
+  border-radius: 999999rem;
+  cursor: pointer;
+}
+
 #root {
   transition: transform 0.3s ease-out;
 }
