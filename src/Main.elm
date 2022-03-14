@@ -1,10 +1,12 @@
 module Main exposing (..)
 
+-- import HexEngine.Grid as Grid exposing (HexGrid)
+-- import HexEngine.GridGenerator as GridGen exposing (MapGenerationConfig, initMapGenConfig)
+
 import Browser
 import Dict
-import HexEngine.Grid as Grid exposing (HexGrid)
-import HexEngine.GridGenerator as GridGen exposing (MapGenerationConfig, initMapGenConfig)
 import HexEngine.Point as Point exposing (Point)
+import HexEngine.RandomMap exposing (RandomMap, explore, exploreNeighbours, fieldOfVisionWithCost, insertReplaceHex, rayTraceWithCost, singleton)
 import HexEngine.Render exposing (cornersToString, fancyHexCorners, pointToPixel, renderGrid)
 import Html exposing (Html, div, text)
 import Html.Attributes exposing (id)
@@ -20,14 +22,35 @@ import Svg.Events
 
 tileType : Float -> Maybe Tile
 tileType val =
-    if val < -0.5 then
+    if val < -0.2 then
         Just Ground
 
-    else if val < 0.5 then
+    else if val < 0.7 then
         Just Rock
 
     else
         Just Ore
+
+
+visionCost : Tile -> Maybe Int
+visionCost tile =
+    case tile of
+        Ground ->
+            Just 1
+
+        Rock ->
+            Nothing
+
+        Ore ->
+            Nothing
+
+        CampFire ->
+            Just 2
+
+
+vision : Point -> RandomMap Tile -> RandomMap Tile
+vision point =
+    fieldOfVisionWithCost 5 point tileType visionCost
 
 
 
@@ -42,26 +65,20 @@ type Tile
 
 
 type alias Model =
-    { map : HexGrid Tile
-    , mapGenConfig : GridGen.MapGenerationConfig
+    { map : RandomMap Tile
     , stamina : Float
     , lastHex : Point
     }
 
 
-initMap : MapGenerationConfig -> HexGrid Tile
-initMap cfg =
-    exploreNeighbours ( 0, 0, 0 ) cfg |> Grid.insert ( ( 0, 0, 0 ), CampFire )
+initMap : RandomMap Tile
+initMap =
+    singleton CampFire 1 |> exploreNeighbours tileType ( 0, 0, 0 )
 
 
 init : ( Model, Cmd Msg )
 init =
-    let
-        mapGenCfg =
-            initMapGenConfig |> GridGen.withSeed 120
-    in
-    ( { map = initMap mapGenCfg
-      , mapGenConfig = mapGenCfg
+    ( { map = initMap
       , stamina = 10
       , lastHex = ( 0, 0, 0 )
       }
@@ -79,24 +96,19 @@ type Msg
     | Rest Point
 
 
-exploreNeighbours : Point -> MapGenerationConfig -> HexGrid Tile
-exploreNeighbours point mapGenCfg =
-    Point.neighbors point
-        |> Set.toList
-        |> List.filterMap (GridGen.randomHex mapGenCfg tileType)
-        |> Dict.fromList
-
-
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         ExploreTile point ->
-            ( { model | map = Dict.union model.map (exploreNeighbours point model.mapGenConfig), lastHex = point }, Cmd.none )
+            ( { model | map = vision point model.map, lastHex = point }, Cmd.none )
 
         DestroyTile point ->
             if model.stamina > 0 then
                 ( { model
-                    | map = Dict.union model.map (exploreNeighbours point model.mapGenConfig) |> Grid.insert ( point, Ground )
+                    | map =
+                        model.map
+                            |> insertReplaceHex ( point, Ground )
+                            |> vision point
                     , stamina = model.stamina - 1
                     , lastHex = point
                   }
@@ -107,7 +119,7 @@ update msg model =
                 ( model, Cmd.none )
 
         Rest point ->
-            ( { model | map = initMap model.mapGenConfig, stamina = 10, lastHex = point }, Cmd.none )
+            ( { model | map = initMap, stamina = 10, lastHex = point }, Cmd.none )
 
 
 
