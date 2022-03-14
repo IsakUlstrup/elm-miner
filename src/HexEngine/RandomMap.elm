@@ -40,9 +40,9 @@ empty seed =
 
 {-| Create a new map with a given tile in the center
 -}
-singleton : tile -> Int -> RandomMap tile
-singleton tile seed =
-    RandomMap (Dict.fromList [ ( ( 0, 0, 0 ), tile ) ]) (initMapGenConfig |> withSeed seed)
+singleton : Point -> tile -> Int -> RandomMap tile
+singleton point tile seed =
+    RandomMap (Dict.fromList [ ( point, tile ) ]) (initMapGenConfig |> withSeed seed)
 
 
 mapHexes : (( Point, tile ) -> a) -> RandomMap tile -> List a

@@ -25,6 +25,9 @@ tileType val =
     if val < -0.5 then
         Just Ground
 
+    else if val < -0.494 then
+        Just CampFire
+
     else if val < 0.7 then
         Just Rock
 
@@ -71,14 +74,14 @@ type alias Model =
     }
 
 
-initMap : RandomMap Tile
-initMap =
-    singleton CampFire 1 |> exploreNeighbours tileType ( 0, 0, 0 )
+initMap : Point -> RandomMap Tile
+initMap point =
+    singleton point CampFire 1 |> exploreNeighbours tileType point
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( { map = initMap
+    ( { map = initMap ( 0, 0, 0 )
       , player = Player.new
       , lastHex = ( 0, 0, 0 )
       }
@@ -126,7 +129,7 @@ update msg model =
 
         Rest point ->
             ( { model
-                | map = initMap
+                | map = initMap point
                 , player = Player.rest model.player
                 , lastHex = point
               }
@@ -172,13 +175,23 @@ renderTile ( point, tile ) =
                 []
 
         CampFire ->
-            Svg.polygon
-                [ Svg.Attributes.points (fancyHexCorners False |> cornersToString)
-                , Svg.Attributes.class "campFire"
-                , Svg.Attributes.class "hex"
-                , Svg.Events.onClick (Rest point)
+            Svg.g []
+                [ Svg.polygon
+                    [ Svg.Attributes.points (fancyHexCorners False |> cornersToString)
+                    , Svg.Attributes.class "campFire"
+                    , Svg.Attributes.class "hex"
+                    , Svg.Events.onClick (Rest point)
+                    ]
+                    []
+                , Svg.text_
+                    [ Svg.Attributes.fontSize "0.5rem"
+                    , Svg.Attributes.textAnchor "middle"
+                    , Svg.Attributes.x "2.5"
+                    , Svg.Attributes.y "5"
+                    , Svg.Attributes.pointerEvents "none"
+                    ]
+                    [ text "🏕️" ]
                 ]
-                []
 
 
 view : Model -> Html Msg

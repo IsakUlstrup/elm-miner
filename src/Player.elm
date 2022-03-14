@@ -10,7 +10,7 @@ type alias Player =
 
 new : Player
 new =
-    Player 5 ( 10, 10 ) ( 3, 3 )
+    Player 25 ( 10, 10 ) ( 3, 3 )
 
 
 rest : Player -> Player
