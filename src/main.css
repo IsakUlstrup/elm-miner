@@ -46,7 +46,9 @@ body {
   position: absolute;
   bottom: 0;
   left: 0;
-  padding: 1rem;
+  right: 0;
+  display: flex;
+  justify-content: center;
 }
 
 #game-skills .skill {
@@ -56,7 +58,7 @@ body {
   outline: none;
   font-size: 2rem;
   color: white;
-  border-radius: 999999rem;
+  /* border: 1px solid red; */
   cursor: pointer;
 }
 

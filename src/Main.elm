@@ -193,6 +193,12 @@ view model =
                         ++ (Tuple.first model.player.beer |> String.fromInt)
                     )
                 ]
+            , button [ Html.Events.onClick DrinkBeer, Html.Attributes.class "skill" ]
+                [ text
+                    ("💣"
+                        ++ (Tuple.first model.player.beer |> String.fromInt)
+                    )
+                ]
             ]
         ]
 
