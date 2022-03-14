@@ -4,13 +4,11 @@ module Main exposing (..)
 -- import HexEngine.GridGenerator as GridGen exposing (MapGenerationConfig, initMapGenConfig)
 
 import Browser
-import Dict
-import HexEngine.Point as Point exposing (Point)
-import HexEngine.RandomMap exposing (RandomMap, explore, exploreNeighbours, fieldOfVisionWithCost, insertReplaceHex, rayTraceWithCost, singleton)
+import HexEngine.Point exposing (Point)
+import HexEngine.RandomMap exposing (RandomMap, exploreNeighbours, fieldOfVisionWithCost, insertReplaceHex, singleton)
 import HexEngine.Render exposing (cornersToString, fancyHexCorners, pointToPixel, renderGrid)
 import Html exposing (Html, div, text)
 import Html.Attributes exposing (id)
-import Set
 import Svg exposing (Svg)
 import Svg.Attributes
 import Svg.Events

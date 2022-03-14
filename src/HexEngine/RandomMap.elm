@@ -1,7 +1,15 @@
-module HexEngine.RandomMap exposing (RandomMap, empty, explore, exploreNeighbours, fieldOfVisionWithCost, insertReplaceHex, rayTraceWithCost, singleton)
+module HexEngine.RandomMap exposing
+    ( RandomMap
+    , empty
+    , explore
+    , exploreNeighbours
+    , fieldOfVisionWithCost
+    , insertReplaceHex
+    , rayTraceWithCost
+    , singleton
+    )
 
 import Dict exposing (Dict)
-import HexEngine.GridGenerator exposing (MapGenerationConfig, initMapGenConfig)
 import HexEngine.Point as Point exposing (Point)
 import Set
 import Simplex exposing (PermutationTable)
@@ -19,7 +27,14 @@ type alias RandomMap tile =
 -}
 empty : Int -> RandomMap tile
 empty seed =
-    RandomMap (Dict.fromList []) (initMapGenConfig |> withSeed seed |> withScale 1)
+    RandomMap (Dict.fromList [])
+        (initMapGenConfig
+            |> withSeed seed
+            |> withScale 1
+            |> withSteps 2
+            |> withStepSize 4
+            |> withPersistence 3
+        )
 
 
 {-| Create a new map with a given tile in the center

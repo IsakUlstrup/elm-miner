@@ -1,7 +1,6 @@
 module HexEngine.Render exposing (cornersToString, fancyHexCorners, pointToPixel, renderGrid)
 
 import Dict
-import HexEngine.Grid exposing (HexGrid)
 import HexEngine.Point as Point exposing (Point)
 import HexEngine.RandomMap exposing (RandomMap)
 import Svg exposing (Svg, g, svg)
