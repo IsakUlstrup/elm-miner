@@ -9,6 +9,7 @@ import HexEngine.RandomMap exposing (RandomMap, exploreNeighbours, fieldOfVision
 import HexEngine.Render exposing (cornersToString, fancyHexCorners, pointToPixel, renderGrid)
 import Html exposing (Html, div, text)
 import Html.Attributes exposing (id)
+import Player exposing (Player)
 import Svg exposing (Svg)
 import Svg.Attributes
 import Svg.Events
@@ -46,9 +47,9 @@ visionCost tile =
             Just 2
 
 
-vision : Point -> RandomMap Tile -> RandomMap Tile
-vision point =
-    fieldOfVisionWithCost 5 point tileType visionCost
+vision : Int -> Point -> RandomMap Tile -> RandomMap Tile
+vision range point =
+    fieldOfVisionWithCost range point tileType visionCost
 
 
 
@@ -64,7 +65,7 @@ type Tile
 
 type alias Model =
     { map : RandomMap Tile
-    , stamina : Float
+    , player : Player
     , lastHex : Point
     }
 
@@ -77,7 +78,7 @@ initMap =
 init : ( Model, Cmd Msg )
 init =
     ( { map = initMap
-      , stamina = 10
+      , player = Player.new
       , lastHex = ( 0, 0, 0 )
       }
     , Cmd.none
@@ -98,16 +99,21 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         ExploreTile point ->
-            ( { model | map = vision point model.map, lastHex = point }, Cmd.none )
+            ( { model
+                | map = vision model.player.perception point model.map
+                , lastHex = point
+              }
+            , Cmd.none
+            )
 
         DestroyTile point ->
-            if model.stamina > 0 then
+            if Player.hasStamina model.player then
                 ( { model
                     | map =
                         model.map
                             |> insertReplaceHex ( point, Ground )
-                            |> vision point
-                    , stamina = model.stamina - 1
+                            |> vision model.player.perception point
+                    , player = Player.useStamina 1 model.player
                     , lastHex = point
                   }
                 , Cmd.none
@@ -117,7 +123,13 @@ update msg model =
                 ( model, Cmd.none )
 
         Rest point ->
-            ( { model | map = initMap, stamina = 10, lastHex = point }, Cmd.none )
+            ( { model
+                | map = initMap
+                , player = Player.rest model.player
+                , lastHex = point
+              }
+            , Cmd.none
+            )
 
 
 
@@ -167,7 +179,7 @@ renderTile ( point, tile ) =
 view : Model -> Html Msg
 view model =
     div [ id "app" ]
-        [ div [ id "game-ui" ] [ text ("Stamina: " ++ String.fromFloat model.stamina) ]
+        [ div [ id "game-ui" ] [ text ("Stamina: " ++ Player.staminaToString model.player) ]
         , renderGrid (model.lastHex |> pointToPixel False) model.map renderTile
         ]
 
