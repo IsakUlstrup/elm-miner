@@ -1,8 +1,7 @@
 module HexEngine.Render exposing (cornersToString, fancyHexCorners, pointToPixel, renderGrid)
 
-import Dict
 import HexEngine.Point as Point exposing (Point)
-import HexEngine.RandomMap exposing (RandomMap)
+import HexEngine.RandomMap exposing (RandomMap, mapHexes)
 import Svg exposing (Svg, g, svg)
 import Svg.Attributes
 import Svg.Keyed
@@ -122,8 +121,8 @@ keyedViewHex renderTile tile =
 edgeShadow : Svg msg
 edgeShadow =
     Svg.radialGradient [ Svg.Attributes.id "edge-shadow" ]
-        [ Svg.stop [ Svg.Attributes.offset "20%", Svg.Attributes.stopColor "black", Svg.Attributes.stopOpacity "0" ] []
-        , Svg.stop [ Svg.Attributes.offset "99%", Svg.Attributes.stopColor "black" ] []
+        [ Svg.stop [ Svg.Attributes.offset "0%", Svg.Attributes.stopColor "black", Svg.Attributes.stopOpacity "0" ] []
+        , Svg.stop [ Svg.Attributes.offset "100%", Svg.Attributes.stopColor "black", Svg.Attributes.stopOpacity "0.6" ] []
         ]
 
 
@@ -134,7 +133,11 @@ renderGrid ( x, y ) map renderTile =
         , Svg.Attributes.preserveAspectRatio "xMidYMid slice"
         ]
         [ Svg.defs [] [ edgeShadow ]
-        , Svg.Keyed.node "g" [ Svg.Attributes.style ("transform: translate(" ++ String.fromFloat -x ++ "px, " ++ String.fromFloat -y ++ "px);"), Svg.Attributes.id "root" ] (List.map (keyedViewHex renderTile) (Dict.toList map.grid))
+        , Svg.Keyed.node "g"
+            [ Svg.Attributes.style ("transform: translate(" ++ String.fromFloat -x ++ "px, " ++ String.fromFloat -y ++ "px);")
+            , Svg.Attributes.id "root"
+            ]
+            (mapHexes (keyedViewHex renderTile) map)
         , Svg.rect
             [ Svg.Attributes.x "-50"
             , Svg.Attributes.y "-50"

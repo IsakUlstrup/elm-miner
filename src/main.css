@@ -32,11 +32,9 @@ body {
   width: 100%;
   height: 100%;
   background-color: #262626;
-  /* box-shadow: inset 0 0 10rem black; */
 }
 
 #game-ui {
-  /* background-color: rgba(49, 49, 49, 0.43); */
   padding: 1rem;
   position: absolute;
   left: 0;
@@ -49,8 +47,14 @@ body {
 }
 
 @keyframes fadeIn {
-  0% {opacity: 0}
-  100% {opacity: 1}
+  0% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .ground {
@@ -71,10 +75,5 @@ body {
 
 .hex {
   -webkit-tap-highlight-color: transparent;
-  /* transition: fill 0.1s; */
-  animation: fadeIn 0.4s ease-out 0.01s;
-}
-
-.hex:active {
-  fill: rgba(255, 255, 255, 0.678);
+  /* animation: fadeIn 1s ease-out; */
 }

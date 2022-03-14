@@ -20,7 +20,7 @@ import Svg.Events
 
 tileType : Float -> Maybe Tile
 tileType val =
-    if val < -0.2 then
+    if val < -0.5 then
         Just Ground
 
     else if val < 0.7 then

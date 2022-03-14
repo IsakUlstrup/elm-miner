@@ -5,6 +5,7 @@ module HexEngine.RandomMap exposing
     , exploreNeighbours
     , fieldOfVisionWithCost
     , insertReplaceHex
+    , mapHexes
     , rayTraceWithCost
     , singleton
     )
@@ -42,6 +43,11 @@ empty seed =
 singleton : tile -> Int -> RandomMap tile
 singleton tile seed =
     RandomMap (Dict.fromList [ ( ( 0, 0, 0 ), tile ) ]) (initMapGenConfig |> withSeed seed)
+
+
+mapHexes : (( Point, tile ) -> a) -> RandomMap tile -> List a
+mapHexes f map =
+    Dict.toList map.grid |> List.map f
 
 
 {-| explore a given point, will generate a new tile if none exists
