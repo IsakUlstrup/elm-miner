@@ -1,19 +1,18 @@
 module Main exposing (..)
 
--- import HexEngine.Grid as Grid exposing (HexGrid)
--- import HexEngine.GridGenerator as GridGen exposing (MapGenerationConfig, initMapGenConfig)
-
 import Browser
 import HexEngine.Point exposing (Point)
-import HexEngine.RandomMap exposing (RandomMap, exploreNeighbours, fieldOfVisionWithCost, insertReplaceHex, singleton)
+import HexEngine.RandomMap as Map exposing (RandomMap, exploreNeighbours, fieldOfVisionWithCost, singleton)
 import HexEngine.Render exposing (cornersToString, fancyHexCorners, pointToPixel, renderGrid)
 import Html exposing (Html, button, div, text)
 import Html.Attributes exposing (id)
 import Html.Events
 import Player exposing (Player)
+import Range
 import Svg exposing (Svg)
 import Svg.Attributes
 import Svg.Events
+import Tile exposing (Tile(..))
 
 
 
@@ -23,16 +22,16 @@ import Svg.Events
 tileType : Float -> Maybe Tile
 tileType val =
     if val < -0.5 then
-        Just Ground
+        Just Tile.ground
 
     else if val < -0.494 then
-        Just CampFire
+        Just Tile.campFire
 
     else if val < 0.7 then
-        Just Rock
+        Just (Tile.rock 10)
 
     else
-        Just Ore
+        Just (Tile.ore 10)
 
 
 visionCost : Tile -> Maybe Int
@@ -41,10 +40,10 @@ visionCost tile =
         Ground ->
             Just 1
 
-        Rock ->
+        Rock _ ->
             Nothing
 
-        Ore ->
+        Ore _ ->
             Nothing
 
         CampFire ->
@@ -58,13 +57,6 @@ vision range point =
 
 
 ---- MODEL ----
-
-
-type Tile
-    = Ground
-    | Rock
-    | Ore
-    | CampFire
 
 
 type alias Model =
@@ -82,7 +74,7 @@ initMap point =
 init : ( Model, Cmd Msg )
 init =
     ( { map = initMap ( 0, 0, 0 )
-      , player = Player.new
+      , player = Player.new 5
       , lastHex = ( 0, 0, 0 )
       }
     , Cmd.none
@@ -116,10 +108,9 @@ update msg model =
                 ( { model
                     | map =
                         model.map
-                            |> insertReplaceHex ( point, Ground )
+                            |> Map.update point (Tile.damage 2)
                             |> vision model.player.perception point
                     , player = Player.useStamina 1 model.player
-                    , lastHex = point
                   }
                 , Cmd.none
                 )
@@ -156,7 +147,7 @@ renderTile ( point, tile ) =
                 ]
                 []
 
-        Rock ->
+        Rock _ ->
             Svg.polygon
                 [ Svg.Attributes.points (fancyHexCorners False |> cornersToString)
                 , Svg.Attributes.class "rock"
@@ -165,7 +156,7 @@ renderTile ( point, tile ) =
                 ]
                 []
 
-        Ore ->
+        Ore _ ->
             Svg.polygon
                 [ Svg.Attributes.points (fancyHexCorners False |> cornersToString)
                 , Svg.Attributes.class "ore"
@@ -201,17 +192,7 @@ view model =
         , renderGrid (model.lastHex |> pointToPixel False) model.map renderTile
         , div [ id "game-skills" ]
             [ button [ Html.Events.onClick DrinkBeer, Html.Attributes.class "skill" ]
-                [ text
-                    ("🍺"
-                        ++ (Tuple.first model.player.beer |> String.fromInt)
-                    )
-                ]
-            , button [ Html.Events.onClick DrinkBeer, Html.Attributes.class "skill" ]
-                [ text
-                    ("💣"
-                        ++ (Tuple.first model.player.beer |> String.fromInt)
-                    )
-                ]
+                [ text ("🍺" ++ (Range.viewHelperInt model.player.beer).value) ]
             ]
         ]
 

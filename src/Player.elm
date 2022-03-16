@@ -1,56 +1,62 @@
 module Player exposing (..)
 
+import Range exposing (Range)
+
 
 type alias Player =
     { perception : Int
-    , stamina : ( Float, Float )
-    , beer : ( Int, Int )
+    , stamina : Range Float
+    , beer : Range Int
     }
 
 
-new : Player
-new =
-    Player 25 ( 10, 10 ) ( 3, 3 )
+new : Int -> Player
+new perception =
+    Player perception (Range.newRange 0 10 10) (Range.newRange 0 3 3)
 
 
 rest : Player -> Player
 rest player =
     { player
-        | stamina = ( Tuple.second player.stamina, Tuple.second player.stamina )
-        , beer = ( Tuple.second player.beer, Tuple.second player.beer )
+        | stamina = Range.setHigh player.stamina
+        , beer = Range.setHigh player.beer
     }
 
 
 hasStamina : Player -> Bool
 hasStamina player =
-    Tuple.first player.stamina > 0
+    Range.isEmpty player.stamina |> not
+
+
+hasBeer : Player -> Bool
+hasBeer player =
+    Range.isEmpty player.beer |> not
 
 
 useStamina : Float -> Player -> Player
 useStamina stam player =
-    { player | stamina = ( max 0 (Tuple.first player.stamina - stam), Tuple.second player.stamina ) }
+    { player | stamina = Range.subtract stam player.stamina }
 
 
 recoverStamina : Float -> Player -> Player
 recoverStamina stam player =
-    { player | stamina = ( min (Tuple.second player.stamina) (Tuple.first player.stamina + stam), Tuple.second player.stamina ) }
+    { player | stamina = Range.add stam player.stamina }
 
 
 drinkBeer : Player -> Player
 drinkBeer player =
-    if Tuple.first player.beer > 0 then
-        { player | beer = ( Tuple.first player.beer - 1, Tuple.second player.beer ) }
+    if hasBeer player then
+        { player | beer = Range.subtract 1 player.beer }
             |> recoverStamina 3
 
     else
         player
 
 
-hasBeer : Player -> Bool
-hasBeer player =
-    Tuple.first player.beer > 0
-
-
 staminaToString : Player -> String
 staminaToString player =
-    (Tuple.first player.stamina |> String.fromFloat) ++ "/" ++ (Tuple.second player.stamina |> String.fromFloat)
+    let
+        stam =
+            Range.viewHelperFloat player.stamina
+    in
+    stam.value ++ "/" ++ stam.max

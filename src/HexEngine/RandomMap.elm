@@ -8,6 +8,7 @@ module HexEngine.RandomMap exposing
     , mapHexes
     , rayTraceWithCost
     , singleton
+    , update
     )
 
 import Dict exposing (Dict)
@@ -48,6 +49,11 @@ singleton point tile seed =
 mapHexes : (( Point, tile ) -> a) -> RandomMap tile -> List a
 mapHexes f map =
     Dict.toList map.grid |> List.map f
+
+
+update : Point -> (Maybe tile -> Maybe tile) -> RandomMap tile -> RandomMap tile
+update point f map =
+    { map | grid = Dict.update point f map.grid }
 
 
 {-| explore a given point, will generate a new tile if none exists
