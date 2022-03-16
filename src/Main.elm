@@ -3,7 +3,7 @@ module Main exposing (..)
 import Browser
 import HexEngine.Point exposing (Point)
 import HexEngine.RandomMap as Map exposing (RandomMap, exploreNeighbours, fieldOfVisionWithCost, singleton)
-import HexEngine.Render exposing (cornersToString, fancyHexCorners, pointToPixel, renderGrid)
+import HexEngine.Render exposing (RenderConfig, cornersToString, fancyHexCorners, initRenderConfig, renderGrid, withHexFocus)
 import Html exposing (Html, button, div, text)
 import Html.Attributes exposing (id)
 import Html.Events
@@ -74,7 +74,7 @@ initMap point =
 init : ( Model, Cmd Msg )
 init =
     ( { map = initMap ( 0, 0, 0 )
-      , player = Player.new 5
+      , player = Player.new 5 5
       , lastHex = ( 0, 0, 0 )
       }
     , Cmd.none
@@ -108,7 +108,7 @@ update msg model =
                 ( { model
                     | map =
                         model.map
-                            |> Map.update point (Tile.damage 2)
+                            |> Map.update point (Tile.damageTile model.player.damage)
                             |> vision model.player.perception point
                     , player = Player.useStamina 1 model.player
                   }
@@ -135,12 +135,17 @@ update msg model =
 ---- VIEW ----
 
 
+defaultRenderConfig : RenderConfig
+defaultRenderConfig =
+    initRenderConfig
+
+
 renderTile : ( Point, Tile ) -> Svg Msg
 renderTile ( point, tile ) =
     case tile of
         Ground ->
             Svg.polygon
-                [ Svg.Attributes.points (fancyHexCorners False |> cornersToString)
+                [ Svg.Attributes.points (fancyHexCorners defaultRenderConfig |> cornersToString)
                 , Svg.Attributes.class "ground"
                 , Svg.Attributes.class "hex"
                 , Svg.Events.onClick (ExploreTile point)
@@ -149,7 +154,7 @@ renderTile ( point, tile ) =
 
         Rock _ ->
             Svg.polygon
-                [ Svg.Attributes.points (fancyHexCorners False |> cornersToString)
+                [ Svg.Attributes.points (fancyHexCorners defaultRenderConfig |> cornersToString)
                 , Svg.Attributes.class "rock"
                 , Svg.Attributes.class "hex"
                 , Svg.Events.onClick (DestroyTile point)
@@ -158,7 +163,7 @@ renderTile ( point, tile ) =
 
         Ore _ ->
             Svg.polygon
-                [ Svg.Attributes.points (fancyHexCorners False |> cornersToString)
+                [ Svg.Attributes.points (fancyHexCorners defaultRenderConfig |> cornersToString)
                 , Svg.Attributes.class "ore"
                 , Svg.Attributes.class "hex"
                 , Svg.Events.onClick (DestroyTile point)
@@ -168,7 +173,7 @@ renderTile ( point, tile ) =
         CampFire ->
             Svg.g []
                 [ Svg.polygon
-                    [ Svg.Attributes.points (fancyHexCorners False |> cornersToString)
+                    [ Svg.Attributes.points (fancyHexCorners defaultRenderConfig |> cornersToString)
                     , Svg.Attributes.class "campFire"
                     , Svg.Attributes.class "hex"
                     , Svg.Events.onClick (Rest point)
@@ -189,7 +194,7 @@ view : Model -> Html Msg
 view model =
     div [ id "app" ]
         [ div [ id "game-ui" ] [ text ("Stamina: " ++ Player.staminaToString model.player) ]
-        , renderGrid (model.lastHex |> pointToPixel False) model.map renderTile
+        , renderGrid (defaultRenderConfig |> withHexFocus model.lastHex) model.map renderTile
         , div [ id "game-skills" ]
             [ button [ Html.Events.onClick DrinkBeer, Html.Attributes.class "skill" ]
                 [ text ("🍺" ++ (Range.viewHelperInt model.player.beer).value) ]

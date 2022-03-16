@@ -7,12 +7,13 @@ type alias Player =
     { perception : Int
     , stamina : Range Float
     , beer : Range Int
+    , damage : Float
     }
 
 
-new : Int -> Player
-new perception =
-    Player perception (Range.newRange 0 10 10) (Range.newRange 0 3 3)
+new : Int -> Float -> Player
+new perception damage =
+    Player perception (Range.newRange 0 10 10) (Range.newRange 0 5 5) damage
 
 
 rest : Player -> Player
@@ -47,7 +48,7 @@ drinkBeer : Player -> Player
 drinkBeer player =
     if hasBeer player then
         { player | beer = Range.subtract 1 player.beer }
-            |> recoverStamina 3
+            |> recoverStamina 6
 
     else
         player

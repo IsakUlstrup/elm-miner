@@ -1,13 +1,24 @@
-module Tile exposing (Tile(..), campFire, damage, ground, ore, rock)
+module Tile exposing (Tile(..), campFire, damageTile, ground, ore, rock)
 
 import Range exposing (Range)
 
 
 type Tile
     = Ground
-    | Rock (Range Float)
-    | Ore (Range Float)
+    | Rock Destroyable
+    | Ore Destroyable
     | CampFire
+
+
+type alias Destroyable =
+    { hp : Range Float
+    , inventory : List Int
+    }
+
+
+destroyable : Float -> List Int -> Destroyable
+destroyable hp inventory =
+    Destroyable (Range.newRange 0 hp hp) inventory
 
 
 ground : Tile
@@ -17,12 +28,12 @@ ground =
 
 rock : Float -> Tile
 rock hp =
-    Rock (Range.newRange 0 hp hp)
+    Rock (destroyable hp [])
 
 
 ore : Float -> Tile
 ore hp =
-    Ore (Range.newRange 0 hp hp)
+    Ore (destroyable hp [])
 
 
 campFire : Tile
@@ -30,33 +41,46 @@ campFire =
     CampFire
 
 
-damage : Float -> Maybe Tile -> Maybe Tile
-damage dmg tile =
+damage : Float -> Destroyable -> ( Destroyable, Maybe (List Int) )
+damage dmg dest =
+    let
+        newHp =
+            Range.subtract dmg dest.hp
+    in
+    if Range.isEmpty newHp then
+        ( { dest | hp = newHp }, Just dest.inventory )
+
+    else
+        ( { dest | hp = newHp }, Nothing )
+
+
+damageTile : Float -> Maybe Tile -> Maybe Tile
+damageTile dmg tile =
     case tile of
         Just Ground ->
             tile
 
         Just (Rock r) ->
             let
-                newHp =
-                    Range.subtract dmg r
+                ( newDest, _ ) =
+                    damage dmg r
             in
-            if Range.isEmpty newHp then
+            if Range.isEmpty newDest.hp then
                 Just Ground
 
             else
-                Just (Rock newHp)
+                Just (Rock newDest)
 
         Just (Ore o) ->
             let
-                newHp =
-                    Range.subtract dmg o
+                ( newDest, _ ) =
+                    damage dmg o
             in
-            if Range.isEmpty newHp then
+            if Range.isEmpty newDest.hp then
                 Just Ground
 
             else
-                Just (Ore newHp)
+                Just (Rock newDest)
 
         Just CampFire ->
             tile
