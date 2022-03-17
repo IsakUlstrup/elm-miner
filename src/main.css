@@ -96,4 +96,9 @@ body {
 .hex {
   -webkit-tap-highlight-color: transparent;
   /* animation: fadeIn 1s ease-out; */
+  transition: fill 0.1s ease-out;
+}
+
+.hex:active {
+  fill: cyan;
 }
