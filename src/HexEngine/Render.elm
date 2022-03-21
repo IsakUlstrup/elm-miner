@@ -165,7 +165,15 @@ renderGrid config map renderTile =
         ]
         [ Svg.defs [] [ edgeShadow ]
         , Svg.Keyed.node "g"
-            [ Svg.Attributes.style ("transform: translate(" ++ String.fromFloat -config.cameraX ++ "px, " ++ String.fromFloat -config.cameraY ++ "px);")
+            [ Svg.Attributes.style
+                ("transform: translate("
+                    ++ String.fromFloat -(config.cameraX * config.zoom)
+                    ++ "px, "
+                    ++ String.fromFloat -(config.cameraY * config.zoom)
+                    ++ "px) scale("
+                    ++ String.fromFloat config.zoom
+                    ++ ");"
+                )
             , Svg.Attributes.id "root"
             ]
             (mapHexes (keyedViewHex config renderTile) map)

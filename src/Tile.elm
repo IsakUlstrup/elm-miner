@@ -1,11 +1,17 @@
-module Tile exposing (Tile(..), campFire, damageTile, ground, ore, rock)
+module Tile exposing (Biome(..), Tile(..), campFire, damageTile, ground, ore, rock)
 
 import Range exposing (Range)
 
 
+type Biome
+    = Cold
+    | Neutral
+    | Fire
+
+
 type Tile
-    = Ground
-    | Rock Destroyable
+    = Ground Biome
+    | Rock Destroyable Biome
     | Ore Destroyable
     | CampFire
 
@@ -21,14 +27,14 @@ destroyable hp inventory =
     Destroyable (Range.newRange 0 hp hp) inventory
 
 
-ground : Tile
-ground =
-    Ground
+ground : Biome -> Tile
+ground biome =
+    Ground biome
 
 
-rock : Float -> Tile
-rock hp =
-    Rock (destroyable hp [])
+rock : Float -> Biome -> Tile
+rock hp biome =
+    Rock (destroyable hp []) biome
 
 
 ore : Float -> Tile
@@ -57,19 +63,19 @@ damage dmg dest =
 damageTile : Float -> Maybe Tile -> Maybe Tile
 damageTile dmg tile =
     case tile of
-        Just Ground ->
+        Just (Ground _) ->
             tile
 
-        Just (Rock r) ->
+        Just (Rock r b) ->
             let
                 ( newDest, _ ) =
                     damage dmg r
             in
             if Range.isEmpty newDest.hp then
-                Just Ground
+                Just (Ground b)
 
             else
-                Just (Rock newDest)
+                Just (Rock newDest b)
 
         Just (Ore o) ->
             let
@@ -77,10 +83,10 @@ damageTile dmg tile =
                     damage dmg o
             in
             if Range.isEmpty newDest.hp then
-                Just Ground
+                Just (Ground Neutral)
 
             else
-                Just (Rock newDest)
+                Just (Ore newDest)
 
         Just CampFire ->
             tile

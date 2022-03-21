@@ -77,12 +77,24 @@ body {
   }
 }
 
-.ground {
-  fill: brown;
+.ground.cold {
+  fill: rgb(31, 87, 88);
+}
+.ground.neutral {
+  fill: rgb(56, 56, 56);
+}
+.ground.fire {
+  fill: rgb(146, 35, 1);
 }
 
-.rock {
-  fill: rgb(75, 18, 18);
+.rock.cold {
+  fill: rgb(9, 226, 255);
+}
+.rock.neutral {
+  fill: rgb(255, 255, 255);
+}
+.rock.fire {
+  fill: rgb(250, 0, 33);
 }
 
 .ore {

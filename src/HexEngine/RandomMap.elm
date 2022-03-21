@@ -7,8 +7,13 @@ module HexEngine.RandomMap exposing
     , insertReplaceHex
     , mapHexes
     , rayTraceWithCost
+    , setMapGenConfig
     , singleton
     , update
+    , withPersistence
+    , withScale
+    , withStepSize
+    , withSteps
     )
 
 import Dict exposing (Dict)
@@ -44,6 +49,11 @@ empty seed =
 singleton : Point -> tile -> Int -> RandomMap tile
 singleton point tile seed =
     RandomMap (Dict.fromList [ ( point, tile ) ]) (initMapGenConfig |> withSeed seed)
+
+
+setMapGenConfig : (MapGenerationConfig -> MapGenerationConfig) -> RandomMap tile -> RandomMap tile
+setMapGenConfig f map =
+    { map | config = f map.config }
 
 
 mapHexes : (( Point, tile ) -> a) -> RandomMap tile -> List a
