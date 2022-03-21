@@ -23,8 +23,8 @@ import Tile exposing (Biome(..), Tile(..), campFire, ground, ore, rock)
 randomGround : Biome -> Random.Generator Tile
 randomGround biome =
     Random.weighted
-        ( 100, ground biome )
-        [ ( 2, campFire )
+        ( 200, ground biome )
+        [ ( 1, campFire )
         ]
 
 
@@ -32,7 +32,7 @@ randomRock : Biome -> Random.Generator Tile
 randomRock biome =
     Random.weighted
         ( 100, rock 10 biome )
-        [ ( 10, ore 10 )
+        [ ( 10, ore 10 biome )
         ]
 
 
@@ -56,7 +56,11 @@ tileType val =
                 tile ((v2 - (1 / 3 * 2)) * 3) Fire
 
         tile v b =
-            if v < 0.42 || v > 0.58 then
+            let
+                pathWidth =
+                    0.05
+            in
+            if v < (1 / 2 - pathWidth) || v > (1 / 2 + pathWidth) then
                 Random.step (randomRock b) (Random.initialSeed (v * 1000 |> round)) |> Tuple.first
 
             else
@@ -74,7 +78,7 @@ visionCost tile =
         Rock _ _ ->
             Nothing
 
-        Ore _ ->
+        Ore _ _ ->
             Nothing
 
         CampFire ->
@@ -100,7 +104,7 @@ type alias Model =
 initMap : Point -> RandomMap Tile
 initMap point =
     singleton point CampFire 1
-        |> setMapGenConfig (Map.withScale 1 >> Map.withStepSize 6 >> Map.withPersistence 5)
+        |> setMapGenConfig (Map.withScale 3 >> Map.withStepSize 6 >> Map.withPersistence 5)
         |> exploreNeighbours tileType point
 
 
@@ -170,7 +174,7 @@ update msg model =
 
 defaultRenderConfig : RenderConfig
 defaultRenderConfig =
-    initRenderConfig |> withZoom 1
+    initRenderConfig |> withZoom 0.8
 
 
 renderTile : ( Point, Tile ) -> Svg Msg
@@ -206,11 +210,11 @@ renderTile ( point, tile ) =
                 ]
                 []
 
-        Ore _ ->
+        Ore _ biome ->
             Svg.polygon
                 [ Svg.Attributes.points (fancyHexCorners defaultRenderConfig |> cornersToString)
                 , Svg.Attributes.class "ore"
-                , Svg.Attributes.class "hex"
+                , Svg.Attributes.class (class biome)
                 , Svg.Events.onClick (DestroyTile point)
                 ]
                 []

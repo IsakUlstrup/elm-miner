@@ -12,7 +12,7 @@ type Biome
 type Tile
     = Ground Biome
     | Rock Destroyable Biome
-    | Ore Destroyable
+    | Ore Destroyable Biome
     | CampFire
 
 
@@ -37,9 +37,9 @@ rock hp biome =
     Rock (destroyable hp []) biome
 
 
-ore : Float -> Tile
-ore hp =
-    Ore (destroyable hp [])
+ore : Float -> Biome -> Tile
+ore hp biome =
+    Ore (destroyable hp []) biome
 
 
 campFire : Tile
@@ -77,16 +77,16 @@ damageTile dmg tile =
             else
                 Just (Rock newDest b)
 
-        Just (Ore o) ->
+        Just (Ore o b) ->
             let
                 ( newDest, _ ) =
                     damage dmg o
             in
             if Range.isEmpty newDest.hp then
-                Just (Ground Neutral)
+                Just (Ground b)
 
             else
-                Just (Ore newDest)
+                Just (Ore newDest b)
 
         Just CampFire ->
             tile
