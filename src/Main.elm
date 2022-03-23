@@ -1,12 +1,13 @@
 module Main exposing (..)
 
 import Browser
-import HexEngine.Point exposing (Point)
+import HexEngine.Point as Point exposing (Point)
 import HexEngine.RandomMap as Map exposing (RandomMap, exploreNeighbours, fieldOfVisionWithCost, setMapGenConfig, singleton)
 import HexEngine.Render exposing (RenderConfig, cornersToString, fancyHexCorners, initRenderConfig, renderGrid, withHexFocus, withZoom)
 import Html exposing (Html, button, div, text)
 import Html.Attributes exposing (id)
 import Html.Events
+import Item exposing (Item, ironOre)
 import Player exposing (Player)
 import Random
 import Range
@@ -31,8 +32,16 @@ randomGround biome =
 randomRock : Biome -> Random.Generator Tile
 randomRock biome =
     Random.weighted
-        ( 100, rock 10 biome )
-        [ ( 10, ore 10 biome )
+        ( 100, rock biome )
+        [ ( 10, ore biome )
+        ]
+
+
+randomOreLoot : Random.Generator (List Item)
+randomOreLoot =
+    Random.weighted
+        ( 100, List.repeat 1 ironOre )
+        [ ( 10, List.repeat 3 ironOre )
         ]
 
 
@@ -75,10 +84,10 @@ visionCost tile =
         Ground _ ->
             Just 1
 
-        Rock _ _ ->
+        Rock _ ->
             Nothing
 
-        Ore _ _ ->
+        Ore _ ->
             Nothing
 
         CampFire ->
@@ -124,7 +133,7 @@ init =
 
 type Msg
     = ExploreTile Point
-    | DestroyTile Point
+    | DestroyTile Point Tile
     | Rest Point
     | DrinkBeer
 
@@ -140,14 +149,23 @@ update msg model =
             , Cmd.none
             )
 
-        DestroyTile point ->
+        DestroyTile point tile ->
             if Player.hasStamina model.player then
+                let
+                    loot =
+                        case tile of
+                            Ore _ ->
+                                Random.step randomOreLoot (Random.initialSeed (Point.toInt point)) |> Tuple.first
+
+                            _ ->
+                                []
+                in
                 ( { model
                     | map =
                         model.map
-                            |> Map.update point (Tile.damageTile model.player.damage)
+                            |> Map.update point Tile.damageTile
                             |> vision model.player.perception point
-                    , player = Player.useStamina 1 model.player
+                    , player = Player.useStamina 1 model.player |> Player.lootItems loot
                   }
                 , Cmd.none
                 )
@@ -201,21 +219,21 @@ renderTile ( point, tile ) =
                 ]
                 []
 
-        Rock _ biome ->
+        Rock biome ->
             Svg.polygon
                 [ Svg.Attributes.points (fancyHexCorners defaultRenderConfig |> cornersToString)
                 , Svg.Attributes.class "rock"
                 , Svg.Attributes.class (class biome)
-                , Svg.Events.onClick (DestroyTile point)
+                , Svg.Events.onClick (DestroyTile point tile)
                 ]
                 []
 
-        Ore _ biome ->
+        Ore biome ->
             Svg.polygon
                 [ Svg.Attributes.points (fancyHexCorners defaultRenderConfig |> cornersToString)
                 , Svg.Attributes.class "ore"
                 , Svg.Attributes.class (class biome)
-                , Svg.Events.onClick (DestroyTile point)
+                , Svg.Events.onClick (DestroyTile point tile)
                 ]
                 []
 
@@ -242,7 +260,11 @@ renderTile ( point, tile ) =
 view : Model -> Html Msg
 view model =
     div [ id "app" ]
-        [ div [ id "game-ui" ] [ text ("Stamina: " ++ Player.staminaToString model.player) ]
+        [ div [ id "game-ui" ]
+            [ text ("Stamina: " ++ Player.staminaToString model.player)
+            , Html.br [] []
+            , text ("Inventory: " ++ String.fromInt (List.length model.player.inventory))
+            ]
         , renderGrid (defaultRenderConfig |> withHexFocus model.lastHex) model.map renderTile
         , div [ id "game-skills" ]
             [ button [ Html.Events.onClick DrinkBeer, Html.Attributes.class "skill" ]

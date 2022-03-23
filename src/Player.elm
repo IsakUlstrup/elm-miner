@@ -1,5 +1,6 @@
 module Player exposing (..)
 
+import Item exposing (Item)
 import Range exposing (Range)
 
 
@@ -8,12 +9,13 @@ type alias Player =
     , stamina : Range Float
     , beer : Range Int
     , damage : Float
+    , inventory : List Item
     }
 
 
 new : Int -> Float -> Player
 new perception damage =
-    Player perception (Range.newRange 0 10 10) (Range.newRange 0 5 5) damage
+    Player perception (Range.newRange 0 10 10) (Range.newRange 0 5 5) damage []
 
 
 rest : Player -> Player
@@ -52,6 +54,11 @@ drinkBeer player =
 
     else
         player
+
+
+lootItems : List Item -> Player -> Player
+lootItems items player =
+    { player | inventory = player.inventory ++ items }
 
 
 staminaToString : Player -> String

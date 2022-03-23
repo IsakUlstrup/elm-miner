@@ -1,6 +1,12 @@
-module Tile exposing (Biome(..), Tile(..), campFire, damageTile, ground, ore, rock)
-
-import Range exposing (Range)
+module Tile exposing
+    ( Biome(..)
+    , Tile(..)
+    , campFire
+    , damageTile
+    , ground
+    , ore
+    , rock
+    )
 
 
 type Biome
@@ -11,20 +17,9 @@ type Biome
 
 type Tile
     = Ground Biome
-    | Rock Destroyable Biome
-    | Ore Destroyable Biome
+    | Rock Biome
+    | Ore Biome
     | CampFire
-
-
-type alias Destroyable =
-    { hp : Range Float
-    , inventory : List Int
-    }
-
-
-destroyable : Float -> List Int -> Destroyable
-destroyable hp inventory =
-    Destroyable (Range.newRange 0 hp hp) inventory
 
 
 ground : Biome -> Tile
@@ -32,14 +27,14 @@ ground biome =
     Ground biome
 
 
-rock : Float -> Biome -> Tile
-rock hp biome =
-    Rock (destroyable hp []) biome
+rock : Biome -> Tile
+rock biome =
+    Rock biome
 
 
-ore : Float -> Biome -> Tile
-ore hp biome =
-    Ore (destroyable hp []) biome
+ore : Biome -> Tile
+ore biome =
+    Ore biome
 
 
 campFire : Tile
@@ -47,46 +42,17 @@ campFire =
     CampFire
 
 
-damage : Float -> Destroyable -> ( Destroyable, Maybe (List Int) )
-damage dmg dest =
-    let
-        newHp =
-            Range.subtract dmg dest.hp
-    in
-    if Range.isEmpty newHp then
-        ( { dest | hp = newHp }, Just dest.inventory )
-
-    else
-        ( { dest | hp = newHp }, Nothing )
-
-
-damageTile : Float -> Maybe Tile -> Maybe Tile
-damageTile dmg tile =
+damageTile : Maybe Tile -> Maybe Tile
+damageTile tile =
     case tile of
         Just (Ground _) ->
             tile
 
-        Just (Rock r b) ->
-            let
-                ( newDest, _ ) =
-                    damage dmg r
-            in
-            if Range.isEmpty newDest.hp then
-                Just (Ground b)
+        Just (Rock b) ->
+            Just (Ground b)
 
-            else
-                Just (Rock newDest b)
-
-        Just (Ore o b) ->
-            let
-                ( newDest, _ ) =
-                    damage dmg o
-            in
-            if Range.isEmpty newDest.hp then
-                Just (Ground b)
-
-            else
-                Just (Ore newDest b)
+        Just (Ore b) ->
+            Just (Ground b)
 
         Just CampFire ->
             tile
