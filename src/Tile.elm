@@ -8,6 +8,8 @@ module Tile exposing
     , rock
     )
 
+import Color exposing (Color)
+
 
 type Biome
     = Cold
@@ -16,23 +18,23 @@ type Biome
 
 
 type Tile
-    = Ground Biome
-    | Rock Biome
-    | Ore Biome
+    = Ground Color
+    | Rock Color
+    | Ore Color
     | CampFire
 
 
-ground : Biome -> Tile
+ground : Color -> Tile
 ground biome =
     Ground biome
 
 
-rock : Biome -> Tile
+rock : Color -> Tile
 rock biome =
     Rock biome
 
 
-ore : Biome -> Tile
+ore : Color -> Tile
 ore biome =
     Ore biome
 

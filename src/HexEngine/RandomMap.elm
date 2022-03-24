@@ -68,7 +68,7 @@ update point f map =
 
 {-| explore a given point, will generate a new tile if none exists
 -}
-explore : (Float -> Maybe tile) -> Point -> RandomMap tile -> RandomMap tile
+explore : (( Point, Float ) -> Maybe tile) -> Point -> RandomMap tile -> RandomMap tile
 explore tileType point map =
     case Dict.get point map.grid of
         Just _ ->
@@ -83,7 +83,7 @@ explore tileType point map =
                     map
 
 
-exploreNeighbours : (Float -> Maybe tile) -> Point -> RandomMap tile -> RandomMap tile
+exploreNeighbours : (( Point, Float ) -> Maybe tile) -> Point -> RandomMap tile -> RandomMap tile
 exploreNeighbours tileType point map =
     let
         points =
@@ -94,7 +94,7 @@ exploreNeighbours tileType point map =
 
 {-| Get value of point, generate a new one if none exists
 -}
-getHex : (Float -> Maybe tile) -> RandomMap tile -> Point -> Maybe tile
+getHex : (( Point, Float ) -> Maybe tile) -> RandomMap tile -> Point -> Maybe tile
 getHex tileType map point =
     case Dict.get point map.grid of
         Just t ->
@@ -138,7 +138,7 @@ insertHexes hexes map =
 {-| Get a line between two points, with cost for passing through tiles
 The cost function defines how much it costs to pass throug a tile, a Nothing value means the tile can't be passed through
 -}
-rayTraceWithCost : Point -> Point -> Int -> (Float -> Maybe tile) -> (tile -> Maybe Int) -> RandomMap tile -> RandomMap tile
+rayTraceWithCost : Point -> Point -> Int -> (( Point, Float ) -> Maybe tile) -> (tile -> Maybe Int) -> RandomMap tile -> RandomMap tile
 rayTraceWithCost from to cap tileType cost map =
     let
         -- Get a list of (Point, tile) representing a line between two points
@@ -174,7 +174,7 @@ rayTraceWithCost from to cap tileType cost map =
 
 {-| Explores map in a radius, based on vision
 -}
-fieldOfVisionWithCost : Int -> Point -> (Float -> Maybe tile) -> (tile -> Maybe Int) -> RandomMap tile -> RandomMap tile
+fieldOfVisionWithCost : Int -> Point -> (( Point, Float ) -> Maybe tile) -> (tile -> Maybe Int) -> RandomMap tile -> RandomMap tile
 fieldOfVisionWithCost radius point tileType cost map =
     let
         ringPoints =
@@ -252,7 +252,7 @@ noise config x y =
         y
 
 
-generateHex : MapGenerationConfig -> (Float -> Maybe tile) -> Point -> Maybe tile
+generateHex : MapGenerationConfig -> (( Point, Float ) -> Maybe tile) -> Point -> Maybe tile
 generateHex config tileType point =
     let
         ( ax, ay ) =
@@ -261,5 +261,5 @@ generateHex config tileType point =
         pointValue =
             noise config (toFloat ax) (toFloat ay)
     in
-    tileType pointValue
+    tileType ( point, pointValue )
         |> Maybe.andThen (\t -> Just t)

@@ -10,8 +10,10 @@ module HexEngine.Point exposing
     , getZ
     , lerp
     , line
+    , magnitude
     , neighbor
     , neighbors
+    , normalize
     , rayTraceWithCost
     , ring
     , scale
@@ -64,6 +66,24 @@ A valid point is one where x + y + z == 0
 valid : Point -> Bool
 valid ( x, y, z ) =
     x + y + z == 0
+
+
+magnitude : ( Float, Float, Float ) -> Float
+magnitude ( x, y, z ) =
+    sqrt ((x ^ 2) + (y ^ 2) + (z ^ 2))
+
+
+normalize : Point -> ( Float, Float, Float )
+normalize ( x, y, z ) =
+    let
+        mag =
+            magnitude ( toFloat x, toFloat y, toFloat z )
+    in
+    if mag > 0 then
+        ( toFloat x / mag, toFloat y / mag, toFloat z / mag )
+
+    else
+        ( 0, 0, 0 )
 
 
 {-| Convert cube point to axial point
