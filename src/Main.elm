@@ -71,7 +71,7 @@ initMap point =
 init : ( Model, Cmd Msg )
 init =
     ( { map = initMap ( 0, 0, 0 )
-      , player = Player.new 25 10
+      , player = Player.new 7 10
       , lastHex = ( 0, 0, 0 )
       }
     , Cmd.none
