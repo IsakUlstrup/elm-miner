@@ -5,14 +5,12 @@ import Color
 import HexEngine.Point as Point exposing (Point)
 import HexEngine.RandomMap as Map exposing (RandomMap, exploreNeighbours, fieldOfVisionWithCost, setMapGenConfig, singleton)
 import HexEngine.Render exposing (RenderConfig, cornersToString, fancyHexCorners, initRenderConfig, renderGrid, withHexFocus, withZoom)
-import Html exposing (Html, button, div, text)
+import Html exposing (Html, div, text)
 import Html.Attributes exposing (id)
-import Html.Events
 import Item exposing (Item, ironOre)
 import MapGen
 import Player exposing (Player)
 import Random
-import Range
 import Svg exposing (Svg)
 import Svg.Attributes
 import Svg.Events
@@ -33,19 +31,18 @@ randomOreLoot =
 
 visionCost : Tile -> Maybe Int
 visionCost tile =
-    Just 0
+    case tile of
+        Ground _ ->
+            Just 1
 
+        Rock _ ->
+            Nothing
 
+        Ore _ ->
+            Nothing
 
--- case tile of
---     Ground _ ->
---         Just 1
---     Rock _ ->
---         Nothing
---     Ore _ ->
---         Nothing
---     CampFire ->
---         Just 2
+        CampFire ->
+            Just 2
 
 
 vision : Int -> Point -> RandomMap Tile -> RandomMap Tile
@@ -146,7 +143,7 @@ update msg model =
 
 defaultRenderConfig : RenderConfig
 defaultRenderConfig =
-    initRenderConfig |> withZoom 0.2
+    initRenderConfig |> withZoom 0.7
 
 
 hexDebug : ( Point, Tile ) -> Svg msg
