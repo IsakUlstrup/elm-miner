@@ -1,7 +1,7 @@
 module Main exposing (..)
 
 import Browser
-import Color
+import Color exposing (Color)
 import HexEngine.Point as Point exposing (Point)
 import HexEngine.RandomMap as Map exposing (RandomMap, exploreNeighbours, fieldOfVisionWithCost, setMapGenConfig, singleton)
 import HexEngine.Render exposing (RenderConfig, cornersToString, fancyHexCorners, initRenderConfig, renderGrid, withHexFocus, withZoom)
@@ -30,7 +30,7 @@ randomOreLoot =
 
 
 visionCost : Tile -> Maybe Int
-visionCost tile =
+visionCost _ =
     Just 0
 
 
@@ -58,7 +58,7 @@ vision range point =
 type alias Model =
     { map : RandomMap Tile
     , player : Player
-    , lastHex : Point
+    , lastHex : ( Point, Color )
     }
 
 
@@ -73,7 +73,7 @@ init : ( Model, Cmd Msg )
 init =
     ( { map = initMap ( 0, 0, 0 )
       , player = Player.new 7 10
-      , lastHex = ( 0, 0, 0 )
+      , lastHex = ( ( 0, 0, 0 ), Color.initColor |> Color.withSaturation 0 |> Color.withLightness 10 )
       }
     , Cmd.none
     )
@@ -84,7 +84,7 @@ init =
 
 
 type Msg
-    = ExploreTile Point
+    = ExploreTile Point Color
     | DestroyTile Point Tile
     | Rest Point
     | DrinkBeer
@@ -93,10 +93,10 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        ExploreTile point ->
+        ExploreTile point color ->
             ( { model
                 | map = vision model.player.perception point model.map
-                , lastHex = point
+                , lastHex = ( point, color )
               }
             , Cmd.none
             )
@@ -129,7 +129,7 @@ update msg model =
             ( { model
                 | map = initMap point
                 , player = Player.rest model.player
-                , lastHex = point
+                , lastHex = ( point, Tuple.second model.lastHex )
               }
             , Cmd.none
             )
@@ -191,7 +191,7 @@ renderTile ( point, tile ) =
                 -- , Svg.Attributes.class (class biome)
                 , Svg.Attributes.fill (color |> Color.withLightness 20 |> Color.toCssString)
                 , Svg.Attributes.class "ground"
-                , Svg.Events.onClick (ExploreTile point)
+                , Svg.Events.onClick (ExploreTile point (color |> Color.withLightness 15))
                 ]
                 []
 
@@ -239,13 +239,13 @@ renderTile ( point, tile ) =
 
 view : Model -> Html Msg
 view model =
-    div [ id "app" ]
+    div [ id "app", Html.Attributes.style "background" (Color.toCssString (Tuple.second model.lastHex)) ]
         [ div [ id "game-ui" ]
             [ text ("Stamina: " ++ Player.staminaToString model.player)
             , Html.br [] []
             , text ("Inventory: " ++ String.fromInt (List.length model.player.inventory))
             ]
-        , renderGrid (defaultRenderConfig |> withHexFocus model.lastHex) model.map renderTile
+        , renderGrid (defaultRenderConfig |> withHexFocus (Tuple.first model.lastHex)) model.map renderTile
 
         -- , div [ id "game-skills" ]
         --     [ button [ Html.Events.onClick DrinkBeer, Html.Attributes.class "skill" ]
