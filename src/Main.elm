@@ -30,20 +30,19 @@ randomOreLoot =
 
 
 visionCost : Tile -> Maybe Int
-visionCost _ =
-    Just 0
+visionCost tile =
+    case tile of
+        Ground _ ->
+            Just 1
 
+        Rock _ ->
+            Nothing
 
+        Ore _ ->
+            Nothing
 
--- case tile of
---     Ground _ ->
---         Just 1
---     Rock _ ->
---         Nothing
---     Ore _ ->
---         Nothing
---     CampFire ->
---         Just 2
+        CampFire ->
+            Just 2
 
 
 vision : Int -> Point -> RandomMap Tile -> RandomMap Tile
@@ -144,7 +143,7 @@ update msg model =
 
 defaultRenderConfig : RenderConfig
 defaultRenderConfig =
-    initRenderConfig |> withZoom 0.2
+    initRenderConfig |> withZoom 0.7
 
 
 hexDebug : ( Point, Tile ) -> Svg msg
@@ -189,7 +188,7 @@ renderTile ( point, tile ) =
                 [ Svg.Attributes.points (fancyHexCorners defaultRenderConfig |> cornersToString)
 
                 -- , Svg.Attributes.class (class biome)
-                , Svg.Attributes.fill (color |> Color.withLightness 20 |> Color.toCssString)
+                , Svg.Attributes.fill (color |> Color.withLightness 25 |> Color.toCssString)
                 , Svg.Attributes.class "ground"
                 , Svg.Events.onClick (ExploreTile point (color |> Color.withLightness 15))
                 ]
