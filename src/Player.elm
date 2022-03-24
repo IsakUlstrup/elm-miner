@@ -15,7 +15,7 @@ type alias Player =
 
 new : Int -> Float -> Player
 new perception damage =
-    Player perception (Range.newRange 0 10 10) (Range.newRange 0 5 5) damage []
+    Player perception (Range.newRange 0 20 20) (Range.newRange 0 5 5) damage []
 
 
 rest : Player -> Player

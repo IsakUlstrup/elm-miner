@@ -152,7 +152,7 @@ keyedViewHex config renderTile tile =
 edgeShadow : Svg msg
 edgeShadow =
     Svg.radialGradient [ Svg.Attributes.id "edge-shadow" ]
-        [ Svg.stop [ Svg.Attributes.offset "0%", Svg.Attributes.stopColor "black", Svg.Attributes.stopOpacity "0" ] []
+        [ Svg.stop [ Svg.Attributes.offset "40%", Svg.Attributes.stopColor "black", Svg.Attributes.stopOpacity "0" ] []
         , Svg.stop [ Svg.Attributes.offset "100%", Svg.Attributes.stopColor "black", Svg.Attributes.stopOpacity "0.6" ] []
         ]
 

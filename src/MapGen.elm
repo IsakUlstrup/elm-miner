@@ -9,7 +9,7 @@ import Tile exposing (Tile)
 randomGround : Color -> Random.Generator Tile
 randomGround biome =
     Random.weighted
-        ( 200, Tile.ground biome )
+        ( 50, Tile.ground biome )
         [ ( 1, Tile.campFire )
         ]
 
@@ -20,6 +20,11 @@ randomRock biome =
         ( 100, Tile.rock biome )
         [ ( 10, Tile.ore biome )
         ]
+
+
+generate : Point -> Random.Generator Tile -> Tile
+generate point gen =
+    Random.step gen (Random.initialSeed (Point.toInt point)) |> Tuple.first
 
 
 tileType : ( Point, Float ) -> Maybe Tile
@@ -41,16 +46,16 @@ tileType ( point, val ) =
             else
                 tile ((v2 - (1 / 3 * 2)) * 3) (initColor |> withHue 300)
 
-        tile v b =
+        tile v c =
             let
                 pathWidth =
                     0.05
             in
             if v < (1 / 2 - pathWidth) || v > (1 / 2 + pathWidth) then
-                Random.step (randomRock b) (Random.initialSeed (v * 1000 |> round)) |> Tuple.first
+                generate point (randomRock c)
 
             else
-                Random.step (randomGround b) (Random.initialSeed (v * 1000 |> round)) |> Tuple.first
+                generate point (randomGround c)
     in
     Just (biome val)
 
@@ -61,11 +66,11 @@ rainbow ( point, val ) =
         ( nx, ny, nz ) =
             Point.normalize point
 
-        ( xa, za, ya ) =
-            ( 30, 90, 150 )
+        ( xa, ya, za ) =
+            ( 120, 240, 360 )
 
         deg =
-            nx * xa + ny * ya + nz * za
+            (nx * xa) + (ny * ya) + (nz * za)
 
         v2 =
             (val + 1) / 2
@@ -76,17 +81,17 @@ rainbow ( point, val ) =
                     0.05
             in
             if v < (1 / 2 - pathWidth) || v > (1 / 2 + pathWidth) then
-                -- Random.step (randomRock b) (Random.initialSeed (v * 1000 |> round)) |> Tuple.first
                 Tile.rock b
 
             else
-                Random.step (randomGround b) (Random.initialSeed (v * 1000 |> round)) |> Tuple.first
+                -- Random.step (randomGround b) (Random.initialSeed (Point.toInt point)) |> Tuple.first
+                generate point (randomGround b)
 
         color v =
-            if v < 0.5 then
+            if v < 0.75 then
                 initColor |> withSaturation 0 |> withLightness 100
 
             else
-                initColor |> withHue (deg * 2) |> withSaturation (v2 * 100)
+                initColor |> withHue (deg + 30) |> withSaturation (v2 * 100)
     in
     Just (tile v2 (color v2))

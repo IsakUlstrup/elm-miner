@@ -33,18 +33,19 @@ randomOreLoot =
 
 visionCost : Tile -> Maybe Int
 visionCost tile =
-    case tile of
-        Ground _ ->
-            Just 1
+    Just 0
 
-        Rock _ ->
-            Nothing
 
-        Ore _ ->
-            Nothing
 
-        CampFire ->
-            Just 2
+-- case tile of
+--     Ground _ ->
+--         Just 1
+--     Rock _ ->
+--         Nothing
+--     Ore _ ->
+--         Nothing
+--     CampFire ->
+--         Just 2
 
 
 vision : Int -> Point -> RandomMap Tile -> RandomMap Tile
@@ -145,7 +146,41 @@ update msg model =
 
 defaultRenderConfig : RenderConfig
 defaultRenderConfig =
-    initRenderConfig |> withZoom 1
+    initRenderConfig |> withZoom 0.2
+
+
+hexDebug : ( Point, Tile ) -> Svg msg
+hexDebug ( point, tile ) =
+    let
+        ( nx, ny, nz ) =
+            Point.normalize point
+    in
+    Svg.g []
+        [ Svg.text_
+            [ Svg.Attributes.fontSize "0.05rem"
+            , Svg.Attributes.textAnchor "middle"
+            , Svg.Attributes.x "2.5"
+            , Svg.Attributes.y "1"
+            , Svg.Attributes.pointerEvents "none"
+            ]
+            [ text ("x: " ++ String.fromFloat nx) ]
+        , Svg.text_
+            [ Svg.Attributes.fontSize "0.05rem"
+            , Svg.Attributes.textAnchor "middle"
+            , Svg.Attributes.x "2.5"
+            , Svg.Attributes.y "2"
+            , Svg.Attributes.pointerEvents "none"
+            ]
+            [ text ("y: " ++ String.fromFloat ny) ]
+        , Svg.text_
+            [ Svg.Attributes.fontSize "0.05rem"
+            , Svg.Attributes.textAnchor "middle"
+            , Svg.Attributes.x "2.5"
+            , Svg.Attributes.y "3"
+            , Svg.Attributes.pointerEvents "none"
+            ]
+            [ text ("z: " ++ String.fromFloat nz) ]
+        ]
 
 
 renderTile : ( Point, Tile ) -> Svg Msg
@@ -213,10 +248,11 @@ view model =
             , text ("Inventory: " ++ String.fromInt (List.length model.player.inventory))
             ]
         , renderGrid (defaultRenderConfig |> withHexFocus model.lastHex) model.map renderTile
-        , div [ id "game-skills" ]
-            [ button [ Html.Events.onClick DrinkBeer, Html.Attributes.class "skill" ]
-                [ text ("🍺" ++ (Range.viewHelperInt model.player.beer).value) ]
-            ]
+
+        -- , div [ id "game-skills" ]
+        --     [ button [ Html.Events.onClick DrinkBeer, Html.Attributes.class "skill" ]
+        --         [ text ("🍺" ++ (Range.viewHelperInt model.player.beer).value) ]
+        --     ]
         ]
 
 
