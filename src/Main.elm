@@ -31,18 +31,19 @@ randomOreLoot =
 
 visionCost : Tile -> Maybe Int
 visionCost tile =
-    case tile of
-        Ground _ ->
-            Just 1
+    Just 0
 
-        Rock _ ->
-            Nothing
 
-        Ore _ ->
-            Nothing
 
-        CampFire ->
-            Just 2
+-- case tile of
+--     Ground _ ->
+--         Just 1
+--     Rock _ ->
+--         Nothing
+--     Ore _ ->
+--         Nothing
+--     CampFire ->
+--         Just 2
 
 
 vision : Int -> Point -> RandomMap Tile -> RandomMap Tile
@@ -143,7 +144,7 @@ update msg model =
 
 defaultRenderConfig : RenderConfig
 defaultRenderConfig =
-    initRenderConfig |> withZoom 0.7
+    initRenderConfig |> withZoom 0.2
 
 
 hexDebug : ( Point, Tile ) -> Svg msg

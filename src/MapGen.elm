@@ -63,14 +63,11 @@ tileType ( point, val ) =
 rainbow : ( Point, Float ) -> Maybe Tile
 rainbow ( point, val ) =
     let
-        ( nx, ny, nz ) =
-            Point.normalize point
-
-        ( xa, ya, za ) =
-            ( 120, 240, 360 )
+        ( nx, ny ) =
+            Point.toAxial point
 
         deg =
-            (nx * xa) + (ny * ya) + (nz * za)
+            (atan2 -(toFloat nx) -(toFloat ny) * 180 / pi) + 180
 
         v2 =
             (val + 1) / 2
@@ -84,7 +81,6 @@ rainbow ( point, val ) =
                 Tile.rock b
 
             else
-                -- Random.step (randomGround b) (Random.initialSeed (Point.toInt point)) |> Tuple.first
                 generate point (randomGround b)
 
         color v =
@@ -92,6 +88,6 @@ rainbow ( point, val ) =
                 initColor |> withSaturation 0 |> withLightness 100
 
             else
-                initColor |> withHue (deg + 30) |> withSaturation (v2 * 100)
+                initColor |> withHue deg |> withSaturation (v2 * 100)
     in
     Just (tile v2 (color v2))
