@@ -1,7 +1,7 @@
 module Main exposing (..)
 
 import Browser
-import Color exposing (initColor, toCssString, withHue, withLightness)
+import Color
 import HexEngine.Point as Point exposing (Point)
 import HexEngine.RandomMap as Map exposing (RandomMap, exploreNeighbours, fieldOfVisionWithCost, setMapGenConfig, singleton)
 import HexEngine.Render exposing (RenderConfig, cornersToString, fancyHexCorners, initRenderConfig, renderGrid, withHexFocus, withZoom)
@@ -9,14 +9,14 @@ import Html exposing (Html, button, div, text)
 import Html.Attributes exposing (id)
 import Html.Events
 import Item exposing (Item, ironOre)
-import MapGen exposing (rainbow, tileType)
+import MapGen
 import Player exposing (Player)
 import Random
 import Range
 import Svg exposing (Svg)
 import Svg.Attributes
 import Svg.Events
-import Tile exposing (Biome(..), Tile(..))
+import Tile exposing (Tile(..))
 
 
 
@@ -49,7 +49,7 @@ visionCost tile =
 
 vision : Int -> Point -> RandomMap Tile -> RandomMap Tile
 vision range point =
-    fieldOfVisionWithCost range point rainbow visionCost
+    fieldOfVisionWithCost range point MapGen.rainbow visionCost
 
 
 
@@ -67,7 +67,7 @@ initMap : Point -> RandomMap Tile
 initMap point =
     singleton point CampFire 1
         |> setMapGenConfig (Map.withScale 1 >> Map.withStepSize 6 >> Map.withPersistence 5)
-        |> exploreNeighbours rainbow point
+        |> exploreNeighbours MapGen.rainbow point
 
 
 init : ( Model, Cmd Msg )
@@ -151,33 +151,33 @@ defaultRenderConfig =
 renderTile : ( Point, Tile ) -> Svg Msg
 renderTile ( point, tile ) =
     case tile of
-        Ground biome ->
+        Ground color ->
             Svg.polygon
                 [ Svg.Attributes.points (fancyHexCorners defaultRenderConfig |> cornersToString)
 
                 -- , Svg.Attributes.class (class biome)
-                , Svg.Attributes.fill (biome |> withLightness 20 |> toCssString)
+                , Svg.Attributes.fill (color |> Color.withLightness 20 |> Color.toCssString)
                 , Svg.Attributes.class "ground"
                 , Svg.Events.onClick (ExploreTile point)
                 ]
                 []
 
-        Rock biome ->
+        Rock color ->
             Svg.polygon
                 [ Svg.Attributes.points (fancyHexCorners defaultRenderConfig |> cornersToString)
                 , Svg.Attributes.class "rock"
-                , Svg.Attributes.fill (biome |> toCssString)
+                , Svg.Attributes.fill (color |> Color.toCssString)
 
                 -- , Svg.Attributes.class (class biome)
                 , Svg.Events.onClick (DestroyTile point tile)
                 ]
                 []
 
-        Ore biome ->
+        Ore color ->
             Svg.polygon
                 [ Svg.Attributes.points (fancyHexCorners defaultRenderConfig |> cornersToString)
                 , Svg.Attributes.class "ore"
-                , Svg.Attributes.fill (biome |> toCssString)
+                , Svg.Attributes.fill (color |> Color.toCssString)
 
                 -- , Svg.Attributes.class (class biome)
                 , Svg.Events.onClick (DestroyTile point tile)

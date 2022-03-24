@@ -3,7 +3,7 @@ module MapGen exposing (..)
 import Color exposing (Color, initColor, withHue, withLightness, withSaturation)
 import HexEngine.Point as Point exposing (Point)
 import Random
-import Tile exposing (Biome(..), Tile, ground)
+import Tile exposing (Tile)
 
 
 randomGround : Color -> Random.Generator Tile

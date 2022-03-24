@@ -1,6 +1,5 @@
 module Tile exposing
-    ( Biome(..)
-    , Tile(..)
+    ( Tile(..)
     , campFire
     , damageTile
     , ground
@@ -11,12 +10,6 @@ module Tile exposing
 import Color exposing (Color)
 
 
-type Biome
-    = Cold
-    | Neutral
-    | Fire
-
-
 type Tile
     = Ground Color
     | Rock Color
@@ -25,18 +18,18 @@ type Tile
 
 
 ground : Color -> Tile
-ground biome =
-    Ground biome
+ground color =
+    Ground color
 
 
 rock : Color -> Tile
-rock biome =
-    Rock biome
+rock color =
+    Rock color
 
 
 ore : Color -> Tile
-ore biome =
-    Ore biome
+ore color =
+    Ore color
 
 
 campFire : Tile
