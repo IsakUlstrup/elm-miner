@@ -188,9 +188,9 @@ renderTile ( point, tile ) =
                 [ Svg.Attributes.points (fancyHexCorners defaultRenderConfig |> cornersToString)
 
                 -- , Svg.Attributes.class (class biome)
-                , Svg.Attributes.fill (color |> Color.withLightness 25 |> Color.toCssString)
+                , Svg.Attributes.fill (color |> Color.withLightness 75 |> Color.toCssString)
                 , Svg.Attributes.class "ground"
-                , Svg.Events.onClick (ExploreTile point (color |> Color.withLightness 15))
+                , Svg.Events.onClick (ExploreTile point (color |> Color.withLightness 25))
                 ]
                 []
 

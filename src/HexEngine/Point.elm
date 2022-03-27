@@ -1,6 +1,8 @@
 module HexEngine.Point exposing
     ( Point
     , add
+    , distance
+    , distanceFloat
     , fieldOfVision
     , fieldOfVisionWithCost
     , fromAxial

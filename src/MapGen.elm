@@ -1,6 +1,6 @@
 module MapGen exposing (..)
 
-import Color exposing (Color, initColor, withHue, withLightness, withSaturation)
+import Color exposing (Color, initColor, withHue, withSaturation)
 import HexEngine.Point as Point exposing (Point)
 import Random
 import Tile exposing (Tile)
@@ -60,34 +60,44 @@ tileType ( point, val ) =
     Just (biome val)
 
 
+degToPoint : Point -> Float
+degToPoint point =
+    let
+        ( q, r ) =
+            Point.toAxial point
+    in
+    (atan2 -(1 * (sqrt 3 * toFloat q + sqrt 3 / 2 * toFloat r))
+        -(1 * (3 / 2 * toFloat r))
+        * 180
+        / pi
+    )
+        + 180
+
+
 rainbow : ( Point, Float ) -> Maybe Tile
 rainbow ( point, val ) =
     let
-        ( nx, ny ) =
-            Point.toAxial point
-
         deg =
-            (atan2 -(toFloat nx) -(toFloat ny) * 180 / pi) + 180
+            degToPoint point
 
         v2 =
             (val + 1) / 2
 
-        tile v b =
+        dist =
+            min 1 (Point.distanceFloat ( 0, 0, 0 ) point / 20)
+
+        tile v =
             let
                 pathWidth =
                     0.05
+
+                color =
+                    initColor |> withHue deg |> withSaturation (dist * 100 * v)
             in
             if v < (1 / 2 - pathWidth) || v > (1 / 2 + pathWidth) then
-                Tile.rock b
+                Tile.rock color
 
             else
-                generate point (randomGround b)
-
-        color v =
-            if v < 0.75 then
-                initColor |> withSaturation 0 |> withLightness 100
-
-            else
-                initColor |> withHue deg |> withSaturation (v2 * 100)
+                generate point (randomGround color)
     in
-    Just (tile v2 (color v2))
+    Just (tile v2)
