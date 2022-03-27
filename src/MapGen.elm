@@ -10,7 +10,7 @@ randomGround : Color -> Random.Generator Tile
 randomGround biome =
     Random.weighted
         ( 50, Tile.ground biome )
-        [ ( 1, Tile.campFire )
+        [ ( 2, Tile.campFire )
         ]
 
 
@@ -86,18 +86,23 @@ rainbow ( point, val ) =
         dist =
             min 1 (Point.distanceFloat ( 0, 0, 0 ) point / 20)
 
-        tile v =
-            let
-                pathWidth =
-                    0.05
+        pathWidth =
+            0.04
 
-                color =
-                    initColor |> withHue deg |> withSaturation (dist * 100 * v)
-            in
-            if v < (1 / 2 - pathWidth) || v > (1 / 2 + pathWidth) then
-                Tile.rock color
+        color v =
+            initColor |> withHue deg |> withSaturation (dist * 100 * v)
+
+        tile v =
+            if v > (1 / 2 - pathWidth) && v < (1 / 2 + pathWidth) then
+                -- ground
+                generate point (randomGround (color v))
+
+            else if v > 0.8 then
+                -- ore
+                Tile.ore (color v)
 
             else
-                generate point (randomGround color)
+                -- rock
+                Tile.rock (color v)
     in
     Just (tile v2)

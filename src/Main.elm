@@ -29,25 +29,29 @@ randomOreLoot =
         ]
 
 
-visionCost : Tile -> Maybe Int
-visionCost tile =
-    case tile of
-        Ground _ ->
-            Just 1
+visionCost : Bool -> Tile -> Maybe Int
+visionCost xray tile =
+    if xray then
+        Just 0
 
-        Rock _ ->
-            Nothing
+    else
+        case tile of
+            Ground _ ->
+                Just 1
 
-        Ore _ ->
-            Nothing
+            Rock _ ->
+                Nothing
 
-        CampFire ->
-            Just 2
+            Ore _ ->
+                Nothing
+
+            CampFire ->
+                Just 2
 
 
 vision : Int -> Point -> RandomMap Tile -> RandomMap Tile
 vision range point =
-    fieldOfVisionWithCost range point MapGen.rainbow visionCost
+    fieldOfVisionWithCost range point MapGen.rainbow (visionCost False)
 
 
 
@@ -206,15 +210,25 @@ renderTile ( point, tile ) =
                 []
 
         Ore color ->
-            Svg.polygon
-                [ Svg.Attributes.points (fancyHexCorners defaultRenderConfig |> cornersToString)
-                , Svg.Attributes.class "ore"
-                , Svg.Attributes.fill (color |> Color.toCssString)
+            Svg.g []
+                [ Svg.polygon
+                    [ Svg.Attributes.points (fancyHexCorners defaultRenderConfig |> cornersToString)
+                    , Svg.Attributes.class "ore"
+                    , Svg.Attributes.fill (color |> Color.toCssString)
 
-                -- , Svg.Attributes.class (class biome)
-                , Svg.Events.onClick (DestroyTile point tile)
+                    -- , Svg.Attributes.class (class biome)
+                    , Svg.Events.onClick (DestroyTile point tile)
+                    ]
+                    []
+                , Svg.text_
+                    [ Svg.Attributes.fontSize "0.5rem"
+                    , Svg.Attributes.textAnchor "middle"
+                    , Svg.Attributes.x "2.5"
+                    , Svg.Attributes.y "5"
+                    , Svg.Attributes.pointerEvents "none"
+                    ]
+                    [ text "\u{1FAA8}" ]
                 ]
-                []
 
         CampFire ->
             Svg.g []
