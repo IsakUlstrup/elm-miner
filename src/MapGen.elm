@@ -1,6 +1,6 @@
 module MapGen exposing (..)
 
-import Color exposing (Color, initColor, withHue, withSaturation)
+import Color exposing (Color, initColor, withHue, withLightness, withSaturation)
 import HexEngine.Point as Point exposing (Point)
 import Random
 import Tile exposing (Tile)
@@ -77,32 +77,49 @@ degToPoint point =
 rainbow : ( Point, Float ) -> Maybe Tile
 rainbow ( point, val ) =
     let
-        deg =
-            degToPoint point
-
-        v2 =
+        -- deg =
+        --     degToPoint point
+        -- transform (-1 to 1) to (0 to 1)
+        normV =
             (val + 1) / 2
 
-        dist =
-            min 1 (Point.distanceFloat ( 0, 0, 0 ) point / 20)
-
+        -- dist =
+        --     min 1 (Point.distanceFloat ( 0, 0, 0 ) point / 20)
+        -- how far is v from a?
+        -- distFromAngle a v =
+        --     (v - a)
+        --         |> abs
+        --         |> (\c -> c / a)
         pathWidth =
             0.04
 
-        color v =
-            initColor |> withHue deg |> withSaturation (dist * 100 * v)
+        color v a =
+            if a < 120 then
+                -- Yellow
+                -- initColor |> withHue 180 |> withSaturation ((100 - (distFromAngle 60 a * 100)) * v)
+                initColor |> withHue 60 |> withSaturation (100 * v)
 
-        tile v =
-            if v > (1 / 2 - pathWidth) && v < (1 / 2 + pathWidth) then
+            else if a < 240 then
+                -- Cyan
+                -- initColor |> withHue 300 |> withSaturation ((100 - (distFromAngle 270 a * 100)) * v)
+                initColor |> withHue 180 |> withSaturation (100 * v)
+
+            else
+                -- Magenta
+                -- initColor |> withHue 50 |> withSaturation ((100 - (distFromAngle 250 deg * 100)) * v)
+                initColor |> withHue 300 |> withSaturation (100 * v)
+
+        tile value angle =
+            if value > (1 / 2 - pathWidth) && value < (1 / 2 + pathWidth) then
                 -- ground
-                generate point (randomGround (color v))
+                generate point (randomGround (color value angle))
 
-            else if v > 0.8 then
+            else if value > 0.8 then
                 -- ore
-                Tile.ore (color v)
+                Tile.ore (color value angle)
 
             else
                 -- rock
-                Tile.rock (color v)
+                Tile.rock (color value angle)
     in
-    Just (tile v2)
+    Just (tile normV (degToPoint point))

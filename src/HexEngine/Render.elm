@@ -157,6 +157,19 @@ edgeShadow =
         ]
 
 
+vignette : Svg msg
+vignette =
+    Svg.rect
+        [ Svg.Attributes.x "-50"
+        , Svg.Attributes.y "-50"
+        , Svg.Attributes.width "100"
+        , Svg.Attributes.height "100"
+        , Svg.Attributes.fill "url('#edge-shadow')"
+        , Svg.Attributes.pointerEvents "none"
+        ]
+        []
+
+
 renderGrid : RenderConfig -> RandomMap tile -> (( Point, tile ) -> Svg msg) -> Svg msg
 renderGrid config map renderTile =
     svg
@@ -177,13 +190,6 @@ renderGrid config map renderTile =
             , Svg.Attributes.id "root"
             ]
             (mapHexes (keyedViewHex config renderTile) map)
-        , Svg.rect
-            [ Svg.Attributes.x "-50"
-            , Svg.Attributes.y "-50"
-            , Svg.Attributes.width "100"
-            , Svg.Attributes.height "100"
-            , Svg.Attributes.fill "url('#edge-shadow')"
-            , Svg.Attributes.pointerEvents "none"
-            ]
-            []
+
+        -- , vignette
         ]
